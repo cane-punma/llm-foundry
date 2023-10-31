@@ -177,9 +177,9 @@ def main(args: Namespace) -> None:
     #     prompt_strings.append(prompt)
     prompt_type = args.prompts[0]
     if prompt_type.startswith('file::'):
-        prompt_strings = load_prompt_string_from_file(prompt)
+        prompt_strings = load_prompt_string_from_file(prompt_type)
     elif prompt_type.startswith('hf::'):
-        prompt_strings = load_prompt_string_from_hf_dataset(prompt)
+        prompt_strings = load_prompt_string_from_hf_dataset(prompt_type)
     else:
         prompt_strings = []
         for prompt in args.prompts:
