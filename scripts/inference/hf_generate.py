@@ -142,7 +142,7 @@ def load_prompt_string_from_hf_dataset(prompt_path_str: str):
         raise ValueError('prompt_path_str must start with "hf::".')
     _, dataset_path = prompt_path_str.split('hf::', maxsplit=1)
     hf_dataset = load_dataset(dataset_path, split='test')
-    return hf_dataset['prompt'][:1]
+    return hf_dataset['prompt'][:2]
 
 
 def maybe_synchronize():
@@ -175,13 +175,14 @@ def main(args: Namespace) -> None:
     #     if prompt.startswith('file::'):
     #         prompt = load_prompt_string_from_file(prompt)
     #     prompt_strings.append(prompt)
-    if prompt.startswith('file::'):
+    prompt_type = args.prompts[0]
+    if prompt_type.startswith('file::'):
         prompt_strings = load_prompt_string_from_file(prompt)
-    elif prompt.startswith('hf::'):
+    elif prompt_type.startswith('hf::'):
         prompt_strings = load_prompt_string_from_hf_dataset(prompt)
     else:
         prompt_strings = []
-        for prompt in prompts:
+        for prompt in args.prompts:
             prompt_strings.append(prompt)
 
     # Grab config first
