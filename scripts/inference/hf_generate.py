@@ -137,6 +137,13 @@ def load_prompt_string_from_file(prompt_path_str: str):
         prompt_string = ''.join(f.readlines())
     return prompt_string
 
+def load_prompt_string_from_hf_dataset(prompt_path_str: str):
+    if not prompt_path_str.startswith('hf::'):
+        raise ValueError('prompt_path_str must start with "hf::".')
+    _, dataset_path = prompt_path_str.split('hf::', maxsplit=1)
+    hf_dataset = load_dataset(dataset_path, split='test')
+    return hf_dataset['prompt'][:1]
+
 
 def maybe_synchronize():
     if torch.cuda.is_available():
@@ -163,11 +170,19 @@ def main(args: Namespace) -> None:
     print(f'Using {model_dtype=}')
 
     # Load prompts
-    prompt_strings = []
-    for prompt in args.prompts:
-        if prompt.startswith('file::'):
-            prompt = load_prompt_string_from_file(prompt)
-        prompt_strings.append(prompt)
+    # prompt_strings = []
+    # for prompt in args.prompts:
+    #     if prompt.startswith('file::'):
+    #         prompt = load_prompt_string_from_file(prompt)
+    #     prompt_strings.append(prompt)
+    if prompt.startswith('file::'):
+        prompt_strings = load_prompt_string_from_file(prompt)
+    elif prompt.startswith('hf::'):
+        prompt_strings = load_prompt_string_from_hf_dataset(prompt)
+    else:
+        prompt_strings = []
+        for prompt in prompts:
+            prompt_strings.append(prompt)
 
     # Grab config first
     print(f'Loading HF Config...')
