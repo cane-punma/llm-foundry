@@ -143,7 +143,7 @@ def load_prompt_string_from_hf_dataset(prompt_path_str: str):
         raise ValueError('prompt_path_str must start with "hf::".')
     _, dataset_path = prompt_path_str.split('hf::', maxsplit=1)
     hf_dataset = load_dataset(dataset_path, split='test')
-    return hf_dataset['prompt']
+    return hf_dataset['prompt'][:2]
 
 
 def maybe_synchronize():
@@ -350,10 +350,10 @@ def main(args: Namespace) -> None:
                         print(delimiter)
                         # f.write(continuation + '\n')
                         if len(continuation) > 0:
-                            # print('\033[92m' + prompt + '\033[0m' + continuation)
-                            f.write(continuation + '\n')
+                            # print('\033[92m' + prompt + '\033[0m' + continuation)                            
+                            f.write(continuation + '[EOS]')
                         else:
-                            f.write('[EOS]\n')
+                            f.write('[EOS]')
                             # print('Warning. No non-special output tokens generated.')
                             # print(
                             #     'This can happen if the generation only contains padding/eos tokens.'
@@ -369,7 +369,7 @@ def main(args: Namespace) -> None:
                 print(f'encoded_inp length: {len(encoded_inp)}')
                 # Write [EOS] to results.txt
                 with open('results.txt', 'a') as f:
-                    f.write('[EOS]\n')
+                    f.write('[EOS]')
 
 
             print(delimiter)
