@@ -143,7 +143,7 @@ def load_prompt_string_from_hf_dataset(prompt_path_str: str):
         raise ValueError('prompt_path_str must start with "hf::".')
     _, dataset_path = prompt_path_str.split('hf::', maxsplit=1)
     hf_dataset = load_dataset(dataset_path, split='test')
-    return hf_dataset['prompt'][:2]
+    return hf_dataset['prompt']
 
 
 def maybe_synchronize():
