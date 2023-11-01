@@ -342,22 +342,25 @@ def main(args: Namespace) -> None:
             # trims extra spaces or does other pre-tokenization things
             effective_prompts = tokenizer.batch_decode(encoded_inp['input_ids'],
                                                        skip_special_tokens=True)
-            for idx, (effective_prompt, prompt, gen) in enumerate(
-                    zip(effective_prompts, batch, decoded_gen)):
-                continuation = gen[len(effective_prompt):]
-                print(delimiter)
-                if len(continuation) > 0:
-                    print('\033[92m' + prompt + '\033[0m' + continuation)
-                else:
-                    print('Warning. No non-special output tokens generated.')
-                    print(
-                        'This can happen if the generation only contains padding/eos tokens.'
-                    )
-                    print('Debug:')
-                    full_generation = tokenizer.batch_decode(
-                        encoded_gen, skip_special_tokens=False)[idx]
-                    print('\033[92m' + 'Prompt:\n' + prompt + '\033[0m')
-                    print('Full generation:\n' + full_generation)
+            with open('results.txt', 'a') as f:
+                for idx, (effective_prompt, prompt, gen) in enumerate(
+                        zip(effective_prompts, batch, decoded_gen)):
+                    continuation = gen[len(effective_prompt):]
+                    print(delimiter)
+                    f.write(continuation + '\n')
+                    
+                    # if len(continuation) > 0:
+                    #     print('\033[92m' + prompt + '\033[0m' + continuation)
+                    # else:
+                    #     print('Warning. No non-special output tokens generated.')
+                    #     print(
+                    #         'This can happen if the generation only contains padding/eos tokens.'
+                    #     )
+                    #     print('Debug:')
+                    #     full_generation = tokenizer.batch_decode(
+                    #         encoded_gen, skip_special_tokens=False)[idx]
+                    #     print('\033[92m' + 'Prompt:\n' + prompt + '\033[0m')
+                    #     print('Full generation:\n' + full_generation)
 
             print(delimiter)
 
