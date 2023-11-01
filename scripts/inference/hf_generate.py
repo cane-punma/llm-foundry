@@ -12,6 +12,7 @@ from typing import Dict, Union
 import numpy as np
 import torch
 from transformers import AutoConfig, AutoModelForCausalLM, AutoTokenizer
+from datasets import load_dataset
 
 
 def get_dtype(dtype: str):
