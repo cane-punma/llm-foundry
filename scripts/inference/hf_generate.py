@@ -347,20 +347,21 @@ def main(args: Namespace) -> None:
                         zip(effective_prompts, batch, decoded_gen)):
                     continuation = gen[len(effective_prompt):]
                     print(delimiter)
-                    f.write(continuation + '\n')
-                    
-                    # if len(continuation) > 0:
-                    #     print('\033[92m' + prompt + '\033[0m' + continuation)
-                    # else:
-                    #     print('Warning. No non-special output tokens generated.')
-                    #     print(
-                    #         'This can happen if the generation only contains padding/eos tokens.'
-                    #     )
-                    #     print('Debug:')
-                    #     full_generation = tokenizer.batch_decode(
-                    #         encoded_gen, skip_special_tokens=False)[idx]
-                    #     print('\033[92m' + 'Prompt:\n' + prompt + '\033[0m')
-                    #     print('Full generation:\n' + full_generation)
+                    # f.write(continuation + '\n')
+                    if len(continuation) > 0:
+                        # print('\033[92m' + prompt + '\033[0m' + continuation)
+                        f.write(continuation + '\n')
+                    else:
+                        f.write('[EOS]\n')
+                        # print('Warning. No non-special output tokens generated.')
+                        # print(
+                        #     'This can happen if the generation only contains padding/eos tokens.'
+                        # )
+                        # print('Debug:')
+                        # full_generation = tokenizer.batch_decode(
+                        #     encoded_gen, skip_special_tokens=False)[idx]
+                        # print('\033[92m' + 'Prompt:\n' + prompt + '\033[0m')
+                        # print('Full generation:\n' + full_generation)
 
             print(delimiter)
 
