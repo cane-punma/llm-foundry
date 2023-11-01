@@ -304,7 +304,7 @@ def main(args: Namespace) -> None:
             print(f'\nTokenizing prompts...')
             maybe_synchronize()
             encode_start = time.time()
-            encoded_inp = tokenizer(batch, return_tensors='pt', padding=True)
+            encoded_inp = tokenizer(batch, return_tensors='pt', padding=True, truncation=True)
             for key, value in encoded_inp.items():
                 encoded_inp[key] = value.to(model.device)
             maybe_synchronize()
@@ -322,46 +322,55 @@ def main(args: Namespace) -> None:
 
             # Run HF generate
             print('Generating responses...')
-            maybe_synchronize()
-            gen_start = time.time()
-            encoded_gen = _generate(encoded_inp)
-            maybe_synchronize()
-            gen_end = time.time()
+            try:
+                maybe_synchronize()
+                gen_start = time.time()
+                encoded_gen = _generate(encoded_inp)
+                maybe_synchronize()
+                gen_end = time.time()
 
-            decode_start = time.time()
-            decoded_gen = tokenizer.batch_decode(encoded_gen,
-                                                 skip_special_tokens=True)
-            maybe_synchronize()
-            decode_end = time.time()
-            gen_tokens = torch.sum(encoded_gen != tokenizer.pad_token_id,
-                                   axis=1).numpy(force=True)  # type: ignore
+                decode_start = time.time()
+                decoded_gen = tokenizer.batch_decode(encoded_gen,
+                                                    skip_special_tokens=True)
+                maybe_synchronize()
+                decode_end = time.time()
+                gen_tokens = torch.sum(encoded_gen != tokenizer.pad_token_id,
+                                    axis=1).numpy(force=True)  # type: ignore
 
-            # Print generations
-            delimiter = '#' * 100
-            # decode the encoded prompt to handle the case when the tokenizer
-            # trims extra spaces or does other pre-tokenization things
-            effective_prompts = tokenizer.batch_decode(encoded_inp['input_ids'],
-                                                       skip_special_tokens=True)
-            with open('results.txt', 'a') as f:
-                for idx, (effective_prompt, prompt, gen) in enumerate(
-                        zip(effective_prompts, batch, decoded_gen)):
-                    continuation = gen[len(effective_prompt):]
-                    print(delimiter)
-                    # f.write(continuation + '\n')
-                    if len(continuation) > 0:
-                        # print('\033[92m' + prompt + '\033[0m' + continuation)
-                        f.write(continuation + '\n')
-                    else:
-                        f.write('[EOS]\n')
-                        # print('Warning. No non-special output tokens generated.')
-                        # print(
-                        #     'This can happen if the generation only contains padding/eos tokens.'
-                        # )
-                        # print('Debug:')
-                        # full_generation = tokenizer.batch_decode(
-                        #     encoded_gen, skip_special_tokens=False)[idx]
-                        # print('\033[92m' + 'Prompt:\n' + prompt + '\033[0m')
-                        # print('Full generation:\n' + full_generation)
+                # Print generations
+                delimiter = '#' * 100
+                # decode the encoded prompt to handle the case when the tokenizer
+                # trims extra spaces or does other pre-tokenization things
+                effective_prompts = tokenizer.batch_decode(encoded_inp['input_ids'],
+                                                        skip_special_tokens=True)
+                with open('results.txt', 'a') as f:
+                    for idx, (effective_prompt, prompt, gen) in enumerate(
+                            zip(effective_prompts, batch, decoded_gen)):
+                        continuation = gen[len(effective_prompt):]
+                        print(delimiter)
+                        # f.write(continuation + '\n')
+                        if len(continuation) > 0:
+                            # print('\033[92m' + prompt + '\033[0m' + continuation)
+                            f.write(continuation + '\n')
+                        else:
+                            f.write('[EOS]\n')
+                            # print('Warning. No non-special output tokens generated.')
+                            # print(
+                            #     'This can happen if the generation only contains padding/eos tokens.'
+                            # )
+                            # print('Debug:')
+                            # full_generation = tokenizer.batch_decode(
+                            #     encoded_gen, skip_special_tokens=False)[idx]
+                            # print('\033[92m' + 'Prompt:\n' + prompt + '\033[0m')
+                            # print('Full generation:\n' + full_generation)
+            except Exception as e:
+                print(f'Error generating: {e}')
+                # print length of encoded_inp
+                print(f'encoded_inp length: {len(encoded_inp)}')
+                # Write [EOS] to results.txt
+                with open('results.txt', 'a') as f:
+                    f.write('[EOS]\n')
+
 
             print(delimiter)
 
